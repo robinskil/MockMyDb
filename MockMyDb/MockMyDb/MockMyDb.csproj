@@ -2,6 +2,10 @@
 
   <PropertyGroup>
     <TargetFramework>netcoreapp3.1</TargetFramework>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <Authors>Robin Kooyman</Authors>
+    <Product>Database Mocker</Product>
+    <Company>Student</Company>
   </PropertyGroup>
 
   <ItemGroup>
