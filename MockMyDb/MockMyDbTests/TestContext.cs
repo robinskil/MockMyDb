@@ -5,9 +5,9 @@ using System.Text;
 
 namespace MockMyDbTests
 {
-    public class QueryTestContext : DbContext
+    public class TestContext : DbContext
     {
-        public QueryTestContext(DbContextOptions<QueryTestContext> options) : base(options)
+        public TestContext(DbContextOptions<TestContext> options) : base(options)
         {
         }
         public DbSet<Student> Students { get; set; }

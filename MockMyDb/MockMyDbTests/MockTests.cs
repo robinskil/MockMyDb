@@ -14,20 +14,20 @@ namespace MockMyDbTests
         [Fact]
         public void CreateDatabase()
         {
-            var optionsBuilder = new DbContextOptionsBuilder<QueryTestContext>();
+            var optionsBuilder = new DbContextOptionsBuilder<TestContext>();
             optionsBuilder.UseSqlServer(connectionString);
-            var context = new QueryTestContext(optionsBuilder.Options);
-            using (var mock = new DbMock<QueryTestContext>(context,a => new QueryTestContext(a)))
+            var context = new TestContext(optionsBuilder.Options);
+            using (var mock = new MockFactory<TestContext>(context,a => new TestContext(a)))
             {
             }
         }
         [Fact]
         public void AddMockDataTest()
         {
-            var optionsBuilder = new DbContextOptionsBuilder<QueryTestContext>();
+            var optionsBuilder = new DbContextOptionsBuilder<TestContext>();
             optionsBuilder.UseSqlServer(connectionString);
-            var context = new QueryTestContext(optionsBuilder.Options);
-            using (var mock = new DbMock<QueryTestContext>(context, a => new QueryTestContext(a)))
+            var context = new TestContext(optionsBuilder.Options);
+            using (var mock = new MockFactory<TestContext>(context, a => new TestContext(a)))
             {
                 Guid studentId = Guid.NewGuid();
                 mock.MockContext.Students.Add(new Student()
