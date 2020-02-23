@@ -11,6 +11,11 @@ namespace MockMyDb
         public MockContextContainer(T context)
         {
             Context = context;
+            SetUpDbObjects();
+        }
+        private void SetUpDbObjects()
+        {
+            Context.Database.EnsureCreated();
         }
         public T GetMockedContext()
         {

@@ -7,15 +7,15 @@ namespace MockMyDb
 {
     public static class MockFactory
     {
-        public static TContext CreateMockContext<TContext>(DbContext contextBase, Func<DbContextOptions<TContext>, TContext> createContext) where TContext : DbContext
+        public static TContext CreateSqlServerMockContext<TContext>(DbContext contextBase, Func<DbContextOptions<TContext>, TContext> createContext) where TContext : DbContext
         {
-            var connection = CreateDatabase(contextBase.Database.GetDbConnection());
+            var connection = CreateSqlServerDatabase(contextBase.Database.GetDbConnection());
             var mockContext = SetupContextContainer<TContext>(connection, createContext);
             return mockContext.GetMockedContext();
         }
-        public static TContext CreateMockContext<TContext>(SqlConnection sqlConnection, Func<DbContextOptions<TContext>, TContext> createContext) where TContext : DbContext
+        public static TContext CreateSqlServerMockContext<TContext>(SqlConnection sqlConnection, Func<DbContextOptions<TContext>, TContext> createContext) where TContext : DbContext
         {
-            var connection = CreateDatabase(sqlConnection);
+            var connection = CreateSqlServerDatabase(sqlConnection);
             var mockContext = SetupContextContainer<TContext>(sqlConnection,createContext);
             return mockContext.GetMockedContext();
         }
@@ -25,7 +25,7 @@ namespace MockMyDb
             optionsBuilder.UseSqlServer(connection);
             return new MockContextContainer<TContext>(createContext(optionsBuilder.Options));
         }
-        private static DbConnection CreateDatabase(DbConnection insertConnection)
+        private static DbConnection CreateSqlServerDatabase(DbConnection insertConnection)
         {
             var databaseName = $"MockDatabase{insertConnection.Database}{DateTime.UtcNow.Ticks}";
             var connection = insertConnection;
