@@ -17,7 +17,7 @@ namespace MockMyDbTests
             var optionsBuilder = new DbContextOptionsBuilder<TestContext>();
             optionsBuilder.UseSqlServer(connectionString);
             var context = new TestContext(optionsBuilder.Options);
-            using (var mock = new MockFactory<TestContext>(context,a => new TestContext(a)))
+            using (var mock = MockFactory.CreateMockContext<TestContext>(context,a => new TestContext(a)))
             {
             }
         }
@@ -27,16 +27,16 @@ namespace MockMyDbTests
             var optionsBuilder = new DbContextOptionsBuilder<TestContext>();
             optionsBuilder.UseSqlServer(connectionString);
             var context = new TestContext(optionsBuilder.Options);
-            using (var mock = new MockFactory<TestContext>(context, a => new TestContext(a)))
+            using (var mock = MockFactory.CreateMockContext<TestContext>(context, a => new TestContext(a)))
             {
                 Guid studentId = Guid.NewGuid();
-                mock.MockContext.Students.Add(new Student()
+                mock.Students.Add(new Student()
                 {
                     Name = "Robin",
                     StudentId = studentId
                 });
-                mock.MockContext.SaveChanges();
-                Assert.NotNull(mock.MockContext.Students.FirstOrDefault(s => s.StudentId == studentId));
+                mock.SaveChanges();
+                Assert.NotNull(mock.Students.FirstOrDefault(s => s.StudentId == studentId));
             }
         }
     }

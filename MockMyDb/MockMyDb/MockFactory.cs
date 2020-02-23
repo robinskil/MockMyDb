@@ -7,19 +7,28 @@ namespace MockMyDb
 {
     public static class MockFactory
     {
-        public static TContext CreateMockContext<TContext>(DbContext contextBase, Func<DbContextOptions<TContext>, TContext> createContext) where TContext : MockContext
+        public static TContext CreateMockContext<TContext>(DbContext contextBase, Func<DbContextOptions<TContext>, TContext> createContext) where TContext : DbContext
         {
-            var connection = CreateDatabase(contextBase);
+            var connection = CreateDatabase(contextBase.Database.GetDbConnection());
+            var mockContext = SetupContextContainer<TContext>(connection, createContext);
+            return mockContext.GetMockedContext();
+        }
+        public static TContext CreateMockContext<TContext>(SqlConnection sqlConnection, Func<DbContextOptions<TContext>, TContext> createContext) where TContext : DbContext
+        {
+            var connection = CreateDatabase(sqlConnection);
+            var mockContext = SetupContextContainer<TContext>(sqlConnection,createContext);
+            return mockContext.GetMockedContext();
+        }
+        private static MockContextContainer<TContext> SetupContextContainer<TContext>(DbConnection connection, Func<DbContextOptions<TContext>, TContext> createContext) where TContext : DbContext
+        {
             var optionsBuilder = new DbContextOptionsBuilder<TContext>();
             optionsBuilder.UseSqlServer(connection);
-            TContext mockContext = createContext(optionsBuilder.Options);
-            mockContext.Database.EnsureCreated();
-            return mockContext;
+            return new MockContextContainer<TContext>(createContext(optionsBuilder.Options));
         }
-        private static DbConnection CreateDatabase(DbContext context)
+        private static DbConnection CreateDatabase(DbConnection insertConnection)
         {
-            var databaseName = $"MockDatabase{context.Database.GetDbConnection().Database}{DateTime.UtcNow.Ticks}";
-            var connection = context.Database.GetDbConnection();
+            var databaseName = $"MockDatabase{insertConnection.Database}{DateTime.UtcNow.Ticks}";
+            var connection = insertConnection;
             connection.Open();
             using (var command = connection.CreateCommand())
             {
