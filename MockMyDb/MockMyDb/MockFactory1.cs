@@ -7,11 +7,16 @@ namespace MockMyDb
 {
     public abstract class MockFactory : IDisposable
     {
-        public string MockDbConnectionString { get {
+        public string MockDbConnectionString
+        {
+            get
+            {
                 if (!deployed)
                     throw new MockException();
                 return MockDbConnectionString;
-            } protected set; }
+            }
+            protected set => MockDbConnectionString = value;
+        }
         public string MockDatabaseName { get; protected set; }
         private bool deployed = false;
 
@@ -26,6 +31,7 @@ namespace MockMyDb
             connection.ChangeDatabase(MockDatabaseName);
             MockDbConnectionString = connection.ConnectionString;
             CreateDatabase(realConnection);
+            SetupDatabaseObjects(realConnection);
             deployed = true;
         }
         public abstract void Dispose();
@@ -35,12 +41,13 @@ namespace MockMyDb
             return $"MockDatabase{dbConnection.Database}{DateTime.UtcNow.Ticks}";
         }
         protected abstract void CreateDatabase(IDbConnection insertConnection);
+        protected abstract void SetupDatabaseObjects(IDbConnection realConnection);
         public abstract IDbConnection GetMockedConnection();
     }
 
     public class SqlServerMockFactory : MockFactory
     {
-        public SqlServerMockFactory(SqlConnection sqlConnection): base(sqlConnection)
+        public SqlServerMockFactory(SqlConnection sqlConnection) : base(sqlConnection)
         {
 
         }
@@ -58,9 +65,14 @@ namespace MockMyDb
             }
         }
 
+        protected override void SetupDatabaseObjects(IDbConnection realConnection)
+        {
+
+        }
+
         public override IDbConnection GetMockedConnection()
         {
-            throw new NotImplementedException();
+            return new SqlConnection(MockDbConnectionString);
         }
 
         protected override void CreateDatabase(IDbConnection insertConnection)
@@ -77,15 +89,15 @@ namespace MockMyDb
         }
     }
 
-    public class MockFactory<TContext> : MockFactory where TContext : DbContext
+    public class MockFactory<TContext> : SqlServerMockFactory where TContext : DbContext
     {
         private TContext SetupContext { get; }
-        public MockFactory(TContext context) : base(context.Database.GetDbConnection())
+        public MockFactory(TContext context) : base(new SqlConnection(context.Database.GetDbConnection().ConnectionString))
         {
 
         }
 
-        private void SetupDatabase()
+        protected override void SetupDatabaseObjects(IDbConnection realConnection)
         {
             SetupContext.Database.EnsureCreated();
         }
