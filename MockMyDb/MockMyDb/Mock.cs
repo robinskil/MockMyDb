@@ -7,9 +7,9 @@ namespace MockMyDb
 {
     public static class Mock
     {
-        public static MockFactory<TContext> CreateMockFactory<TContext>() where TContext : DbContext
+        public static SqlMockContextFactory<TContext> CreateMockFactory<TContext>(TContext context) where TContext : DbContext
         {
-
+            return new SqlMockContextFactory<TContext>(context);
         }
     }
 }
