@@ -8,7 +8,7 @@ using System.Linq;
 
 namespace MockMyDbTests
 {
-    public class MockTests
+    public class MockContextTests
     {
         public const string connectionString = @"Server=DESKTOP-MNMDILM\TASKAPP;Database=QueryAggregator;Integrated Security=true;";
         [Fact]
@@ -19,7 +19,7 @@ namespace MockMyDbTests
             var context = new TestContext(optionsBuilder.Options);
             using (var mockFactory = Mock.CreateMockFactory(context))
             {
-                //var context2 = mockFactory.CreateContext();
+                var context2 = mockFactory.CreateMockContext();
             }
             //using (var mock = MockFactory.CreateSqlServerMockContext<TestContext>(context,a => new TestContext(a)))
             //{
@@ -28,20 +28,21 @@ namespace MockMyDbTests
         [Fact]
         public void AddMockDataTest()
         {
-            //var optionsBuilder = new DbContextOptionsBuilder<TestContext>();
-            //optionsBuilder.UseSqlServer(connectionString);
-            //var context = new TestContext(optionsBuilder.Options);
-            //using (var mock = MockFactory.CreateSqlServerMockContext<TestContext>(context, a => new TestContext(a)))
-            //{
-            //    Guid studentId = Guid.NewGuid();
-            //    mock.Students.Add(new Student()
-            //    {
-            //        Name = "Robin",
-            //        StudentId = studentId
-            //    });
-            //    mock.SaveChanges();
-            //    Assert.NotNull(mock.Students.FirstOrDefault(s => s.StudentId == studentId));
-            //}
+            var optionsBuilder = new DbContextOptionsBuilder<TestContext>();
+            optionsBuilder.UseSqlServer(connectionString);
+            var context = new TestContext(optionsBuilder.Options);
+            using (var mock = Mock.CreateMockFactory(context))
+            {
+                var mockContext = mock.CreateMockContext();
+                Guid studentId = Guid.NewGuid();
+                mockContext.Students.Add(new Student()
+                {
+                    Name = "Robin",
+                    StudentId = studentId
+                });
+                mockContext.SaveChanges();
+                Assert.NotNull(mockContext.Students.FirstOrDefault(s => s.StudentId == studentId));
+            }
         }
     }
 }
