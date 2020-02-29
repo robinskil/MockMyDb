@@ -92,7 +92,7 @@ namespace MockMyDb
 
         }
 
-        public virtual SqlConnection GetMockedConnection()
+        public virtual SqlConnection GetMockConnection()
         {
             return new SqlConnection(MockDbConnectionString);
         }

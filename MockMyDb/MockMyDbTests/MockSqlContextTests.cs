@@ -8,11 +8,11 @@ using System.Linq;
 
 namespace MockMyDbTests
 {
-    public class MockContextTests
+    public class MockSqlContextTests
     {
         public const string connectionString = @"Server=DESKTOP-MNMDILM\TASKAPP;Database=QueryAggregator;Integrated Security=true;";
         [Fact]
-        public void CreateDatabase()
+        public void CreateDatabaseContext()
         {
             var optionsBuilder = new DbContextOptionsBuilder<TestContext>();
             optionsBuilder.UseSqlServer(connectionString);
@@ -21,9 +21,14 @@ namespace MockMyDbTests
             {
                 var context2 = mockFactory.CreateMockContext();
             }
-            //using (var mock = MockFactory.CreateSqlServerMockContext<TestContext>(context,a => new TestContext(a)))
-            //{
-            //}
+        }
+        [Fact]
+        public void CreateDatabaseConnectionString()
+        {
+            using (var mockFactory = Mock.CreateMockFactory<TestContext>(connectionString))
+            {
+                var context2 = mockFactory.CreateMockContext();
+            }
         }
         [Fact]
         public void AddMockDataTest()

@@ -8,7 +8,7 @@ namespace MockMyDb
     {
         string MockDatabaseName { get; }
         string MockDbConnectionString { get; }
-        SqlConnection GetMockedConnection();
+        SqlConnection GetMockConnection();
     }
     public interface ISqlServerMockFactory<TContext> : ISqlServerMockFactory where TContext : DbContext
     {
