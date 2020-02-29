@@ -8,19 +8,19 @@ namespace MockMyDb
 {
     public static class Mock
     {
-        public static SqlServerMockFactory<TContext> CreateMockFactory<TContext>(TContext context) where TContext : DbContext
+        public static ISqlServerMockFactory<TContext> CreateMockFactory<TContext>(TContext context) where TContext : DbContext
         {
             return new SqlServerMockFactory<TContext>(context);
         }
-        public static SqlServerMockFactory<TContext> CreateMockFactory<TContext>(string connectionString) where TContext : DbContext
+        public static ISqlServerMockFactory<TContext> CreateMockFactory<TContext>(string connectionString) where TContext : DbContext
         {
             return new SqlServerMockFactory<TContext>(connectionString);
         }
-        public static SqlServerMockFactory CreateMockFactory(SqlConnection sqlConnection)
+        public static ISqlServerMockFactory CreateMockFactory(SqlConnection sqlConnection)
         {
             return new SqlServerMockFactory(sqlConnection);
         }
-        public static SqlServerMockFactory CreateMockFactory(string sqlConnection)
+        public static ISqlServerMockFactory CreateMockFactory(string sqlConnection)
         {
             return new SqlServerMockFactory(new SqlConnection(sqlConnection));
         }

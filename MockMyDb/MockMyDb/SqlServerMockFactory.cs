@@ -7,7 +7,7 @@ using System.Reflection;
 
 namespace MockMyDb
 {
-    public class SqlServerMockFactory : IDisposable
+    internal class SqlServerMockFactory : ISqlServerMockFactory
     {
         private string _mockDbConntectionString;
         public string MockDbConnectionString
@@ -114,7 +114,7 @@ namespace MockMyDb
         }
     }
 
-    public class SqlServerMockFactory<TContext> : SqlServerMockFactory where TContext : DbContext
+    internal class SqlServerMockFactory<TContext> : SqlServerMockFactory, ISqlServerMockFactory<TContext> where TContext : DbContext
     {
         public SqlServerMockFactory(string connectionString) : base(new SqlConnection(connectionString))
         {
