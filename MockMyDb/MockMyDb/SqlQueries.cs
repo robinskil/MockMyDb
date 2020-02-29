@@ -12,14 +12,16 @@ namespace MockMyDb
             sqlCommand.CommandText = @"DECLARE  
       @object_name SYSNAME  
     , @object_id INT  
-    , @SQL NVARCHAR(MAX)  
-  
+    , @table_name NVARCHAR(MAX) 
+
+SELECT @table_name = @tableName  
+
 SELECT  
       @object_name = '[' + OBJECT_SCHEMA_NAME(o.[object_id]) + '].[' + OBJECT_NAME([object_id]) + ']'  
     , @object_id = [object_id]  
 FROM (SELECT [object_id] = OBJECT_ID('dbo.@tableName', 'U')) o  
   
-SELECT @SQL = 'CREATE TABLE ' + @object_name + CHAR(13) + '(' + CHAR(13) + STUFF((  
+SELECT 'CREATE TABLE ' + @object_name + CHAR(13) + '(' + CHAR(13) + STUFF((  
     SELECT CHAR(13) + '    , [' + c.name + '] ' +   
         CASE WHEN c.is_computed = 1  
             THEN 'AS ' + OBJECT_DEFINITION(c.[object_id], c.column_id)  
