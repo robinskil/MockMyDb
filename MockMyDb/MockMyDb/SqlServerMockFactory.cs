@@ -82,14 +82,13 @@ namespace MockMyDb
                         command.CommandText = tableCreateStatement;
                         command.ExecuteNonQuery();
                     }
-                    foreach (var foreignKeyCreateStatement in foreignKeyCreateStatements)
+                    //foreach (var foreignKeyCreateStatement in foreignKeyCreateStatements)
                     {
                         command.CommandText = foreignKeyCreateStatement;
                         command.ExecuteNonQuery();
                     }
                 }
             }
-
         }
 
         public virtual SqlConnection GetMockConnection()

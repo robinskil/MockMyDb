@@ -100,8 +100,11 @@ SELECT @SQL = 'CREATE TABLE ' + @object_name + CHAR(13) + '(' + CHAR(13) + STUFF
             var reader = sqlCommand.ExecuteReader();
             if (reader.Read())
             {
-                return reader.GetString(0);
+                string result = reader.GetString(0);
+                reader.Close();
+                return result;
             }
+            reader.Close();
             return null;
         }
 
@@ -118,6 +121,7 @@ SELECT @SQL = 'CREATE TABLE ' + @object_name + CHAR(13) + '(' + CHAR(13) + STUFF
             {
                 tables.Add(reader.GetString(0));
             }
+            reader.Close();
             return tables;
         }
 
@@ -139,6 +143,7 @@ SELECT @SQL = 'CREATE TABLE ' + @object_name + CHAR(13) + '(' + CHAR(13) + STUFF
             {
                 foreignKeyStatements.Add(reader.GetString(0));
             }
+            reader.Close();
             return foreignKeyStatements;
         }
     }
