@@ -19,7 +19,7 @@ SELECT @table_name = @tableName
 SELECT  
       @object_name = '[' + OBJECT_SCHEMA_NAME(o.[object_id]) + '].[' + OBJECT_NAME([object_id]) + ']'  
     , @object_id = [object_id]  
-FROM (SELECT [object_id] = OBJECT_ID('dbo.@tableName', 'U')) o  
+FROM (SELECT [object_id] = OBJECT_ID('@table_name', 'U')) o  
   
 SELECT 'CREATE TABLE ' + @object_name + CHAR(13) + '(' + CHAR(13) + STUFF((  
     SELECT CHAR(13) + '    , [' + c.name + '] ' +   
