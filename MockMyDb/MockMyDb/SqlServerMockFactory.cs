@@ -57,6 +57,7 @@ namespace MockMyDb
         }
         protected virtual void SetupDatabaseObjects(SqlConnection realConnection)
         {
+            List<string> tableNames = new List<string>();
             List<string> tableCreateStatements = new List<string>();
             List<string> foreignKeyCreateStatements = new List<string>();
             using (var connectionReal = new SqlConnection(realConnection.ConnectionString))
@@ -64,11 +65,17 @@ namespace MockMyDb
                 connectionReal.Open();
                 using (var command = connectionReal.CreateCommand())
                 {
-                    var tableNames = command.QueryAllTables(realConnection.Database);
+                    tableNames.AddRange(command.QueryAllTables(realConnection.Database));
+                }
+                using (var command = connectionReal.CreateCommand())
+                {
                     foreach (var tableName in tableNames)
                     {
                         tableCreateStatements.Add(command.QueryTableCreateStatement(tableName));
                     }
+                }
+                using (var command = connectionReal.CreateCommand())
+                {
                     foreignKeyCreateStatements.AddRange(command.QueryAllForeignKeys());
                 }
             }
@@ -83,10 +90,10 @@ namespace MockMyDb
                         command.ExecuteNonQuery();
                     }
                     //foreach (var foreignKeyCreateStatement in foreignKeyCreateStatements)
-                    {
-                        command.CommandText = foreignKeyCreateStatement;
-                        command.ExecuteNonQuery();
-                    }
+                    //{
+                    //    command.CommandText = foreignKeyCreateStatement;
+                    //    command.ExecuteNonQuery();
+                    //}
                 }
             }
         }
