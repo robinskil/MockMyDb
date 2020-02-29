@@ -112,9 +112,7 @@ SELECT @SQL = 'CREATE TABLE ' + @object_name + CHAR(13) + '(' + CHAR(13) + STUFF
         {
             sqlCommand.CommandText = @"SELECT TABLE_NAME
                                         FROM INFORMATION_SCHEMA.TABLES
-                                        WHERE TABLE_TYPE = 'BASE TABLE' AND TABLE_CATALOG='@dbName'";
-            sqlCommand.Parameters.Add("@dbName", System.Data.SqlDbType.NVarChar);
-            sqlCommand.Parameters["@dbName"].Value = dbName;
+                                        WHERE TABLE_TYPE = 'BASE TABLE'";
             var reader = sqlCommand.ExecuteReader();
             var tables = new List<string>();
             while (reader.Read())
