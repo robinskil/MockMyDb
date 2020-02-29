@@ -29,7 +29,8 @@ namespace MockMyDb
 
         public virtual void Dispose()
         {
-            using (var sqlConnection = new SqlConnection(MockDbConnectionString))
+            var serverConnection = new SqlConnectionStringBuilder(MockDbConnectionString).InitialCatalog = "";
+            using (var sqlConnection = new SqlConnection(serverConnection))
             {
                 sqlConnection.Open();
                 using (var command = sqlConnection.CreateCommand())

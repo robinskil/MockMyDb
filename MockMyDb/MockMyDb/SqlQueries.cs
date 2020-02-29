@@ -19,7 +19,7 @@ SELECT @table_name = @tableName
 SELECT  
       @object_name = '[' + OBJECT_SCHEMA_NAME(o.[object_id]) + '].[' + OBJECT_NAME([object_id]) + ']'  
     , @object_id = [object_id]  
-FROM (SELECT [object_id] = OBJECT_ID('@table_name', 'U')) o  
+FROM (SELECT [object_id] = OBJECT_ID(@table_name, 'U')) o  
   
 SELECT 'CREATE TABLE ' + @object_name + CHAR(13) + '(' + CHAR(13) + STUFF((  
     SELECT CHAR(13) + '    , [' + c.name + '] ' +   
@@ -100,6 +100,7 @@ SELECT 'CREATE TABLE ' + @object_name + CHAR(13) + '(' + CHAR(13) + STUFF((
             sqlCommand.Parameters.Add("@tableName", System.Data.SqlDbType.NVarChar);
             sqlCommand.Parameters["@tableName"].Value = tableName;
             var reader = sqlCommand.ExecuteReader();
+            sqlCommand.Parameters.Clear();
             if (reader.Read())
             {
                 string result = reader.GetString(0);
