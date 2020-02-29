@@ -30,7 +30,7 @@ namespace MockMyDb
         public virtual void Dispose()
         {
             var connectionStringBuilder = new SqlConnectionStringBuilder(MockDbConnectionString);
-            connectionStringBuilder.InitialCatalog = "";
+            connectionStringBuilder.InitialCatalog = "QueryAggregator";
             var serverConnection = connectionStringBuilder.ToString();
             using (var sqlConnection = new SqlConnection(serverConnection))
             {
@@ -38,7 +38,8 @@ namespace MockMyDb
                 using (var command = sqlConnection.CreateCommand())
                 {
 #pragma warning disable CA2100 // Review SQL queries for security vulnerabilities
-                    command.CommandText = $"Drop Database {MockDatabaseName};";
+                    command.CommandText = @$"ALTER DATABASE {MockDatabaseName} SET SINGLE_USER WITH ROLLBACK IMMEDIATE;
+                                            DROP DATABASE {MockDatabaseName}";
 #pragma warning restore CA2100 // Review SQL queries for security vulnerabilities
                     command.ExecuteNonQuery();
                 }
