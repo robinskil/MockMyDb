@@ -38,7 +38,7 @@ namespace MockMyDb
                 using (var command = sqlConnection.CreateCommand())
                 {
 #pragma warning disable CA2100 // Review SQL queries for security vulnerabilities
-                    command.CommandText = @$"ALTER DATABASE {MockDatabaseName} SET SINGLE_USER WITH ROLLBACK IMMEDIATE;
+                    command.CommandText = $@"ALTER DATABASE {MockDatabaseName} SET SINGLE_USER WITH ROLLBACK IMMEDIATE;
                                             DROP DATABASE {MockDatabaseName}";
 #pragma warning restore CA2100 // Review SQL queries for security vulnerabilities
                     command.ExecuteNonQuery();
@@ -93,11 +93,11 @@ namespace MockMyDb
                         command.CommandText = tableCreateStatement;
                         command.ExecuteNonQuery();
                     }
-                    //foreach (var foreignKeyCreateStatement in foreignKeyCreateStatements)
-                    //{
-                    //    command.CommandText = foreignKeyCreateStatement;
-                    //    command.ExecuteNonQuery();
-                    //}
+                    foreach (var foreignKeyCreateStatement in foreignKeyCreateStatements)
+                    {
+                        command.CommandText = foreignKeyCreateStatement;
+                        command.ExecuteNonQuery();
+                    }
                 }
             }
         }

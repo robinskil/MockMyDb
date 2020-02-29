@@ -48,7 +48,7 @@ namespace MockMyDbTests
                     connection.Open();
                     using (var command = connection.CreateCommand())
                     {
-                        command.CommandText = "Insert into Student values (@studentId,@name)";
+                        command.CommandText = "Insert into Students values (@studentId,@name)";
                         command.Parameters.Add("@studentId", System.Data.SqlDbType.UniqueIdentifier);
                         command.Parameters.Add("@name", System.Data.SqlDbType.NVarChar);
                         command.Parameters["@name"].Value = s.Name;
