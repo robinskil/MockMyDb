@@ -21,16 +21,18 @@ namespace MockMyDb
             protected set => _mockDbConntectionString = value;
         }
         public string MockDatabaseName { get; protected set; }
+        public string RealDatabaseName { get; }
         private bool databaseDeployed = false;
         public SqlServerMockFactory(SqlConnection sqlConnection)
         {
+            RealDatabaseName = sqlConnection.Database;
             SetupMockConnection(sqlConnection);
         }
 
         public virtual void Dispose()
         {
             var connectionStringBuilder = new SqlConnectionStringBuilder(MockDbConnectionString);
-            connectionStringBuilder.InitialCatalog = "QueryAggregator";
+            connectionStringBuilder.InitialCatalog = RealDatabaseName;
             var serverConnection = connectionStringBuilder.ToString();
             using (var sqlConnection = new SqlConnection(serverConnection))
             {
