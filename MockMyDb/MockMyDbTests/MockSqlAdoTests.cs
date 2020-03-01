@@ -1,4 +1,4 @@
-﻿using Microsoft.Data.SqlClient;
+using Microsoft.Data.SqlClient;
 using MockMyDb;
 using System;
 using System.Collections.Generic;
@@ -43,12 +43,13 @@ namespace MockMyDbTests
             };
             using (var mockFactory = Mock.CreateMockFactory(connectionString))
             {
-                using (var connection = mockFactory.GetMockConnection())
+                using (var connection = mockFactory.GetSqlMockConnection())
                 {
                     connection.Open();
                     using (var command = connection.CreateCommand())
                     {
                         command.CommandText = "Insert into Students values (@studentId,@name)";
+                        var para = command.CreateParameter();
                         command.Parameters.Add("@studentId", System.Data.SqlDbType.UniqueIdentifier);
                         command.Parameters.Add("@name", System.Data.SqlDbType.NVarChar);
                         command.Parameters["@name"].Value = s.Name;

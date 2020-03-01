@@ -4,11 +4,9 @@ using System;
 
 namespace MockMyDb
 {
-    public interface ISqlServerMockFactory : IDisposable
+    public interface ISqlServerMockFactory : IMockFactory
     {
-        string MockDatabaseName { get; }
-        string MockDbConnectionString { get; }
-        SqlConnection GetMockConnection();
+        SqlConnection GetSqlMockConnection();
     }
     public interface ISqlServerMockFactory<TContext> : ISqlServerMockFactory where TContext : DbContext
     {

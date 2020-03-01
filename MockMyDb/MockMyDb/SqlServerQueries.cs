@@ -5,7 +5,7 @@ using System.Text;
 
 namespace MockMyDb
 {
-    internal static class SqlQueries
+    internal static class SqlServerQueries
     {
         public static string QueryTableCreateStatement(this SqlCommand sqlCommand, string tableName)
         {

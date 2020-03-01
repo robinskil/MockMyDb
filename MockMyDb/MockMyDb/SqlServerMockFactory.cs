@@ -4,32 +4,18 @@ using System.Data.Common;
 using Microsoft.Data.SqlClient;
 using System.Collections.Generic;
 using System.Reflection;
+using System.Data;
 
 namespace MockMyDb
 {
-    internal class SqlServerMockFactory : ISqlServerMockFactory
+    internal class SqlServerMockFactory : MockFactory , ISqlServerMockFactory 
     {
-        private string _mockDbConntectionString;
-        public string MockDbConnectionString
+        public SqlServerMockFactory(SqlConnection sqlConnection) : base(sqlConnection)
         {
-            get
-            {
-                if (!databaseDeployed)
-                    throw new MockException("Database hasn't been deployed yet.");
-                return _mockDbConntectionString;
-            }
-            protected set => _mockDbConntectionString = value;
-        }
-        public string MockDatabaseName { get; protected set; }
-        public string RealDatabaseName { get; }
-        private bool databaseDeployed = false;
-        public SqlServerMockFactory(SqlConnection sqlConnection)
-        {
-            RealDatabaseName = sqlConnection.Database;
             SetupMockConnection(sqlConnection);
         }
 
-        public virtual void Dispose()
+        public override void Dispose()
         {
             var connectionStringBuilder = new SqlConnectionStringBuilder(MockDbConnectionString);
             connectionStringBuilder.InitialCatalog = RealDatabaseName;
@@ -47,31 +33,50 @@ namespace MockMyDb
                 }
             }
         }
-        protected void SetupMockConnection(SqlConnection realConnection)
+
+        public override IDbConnection GetMockConnection()
         {
-            MockDatabaseName = GenerateMockDatabaseName(realConnection);
-            CreateDatabase(realConnection);
-            SqlConnectionStringBuilder connectionStringBuilder = new SqlConnectionStringBuilder(realConnection.ConnectionString);
+            return GetSqlMockConnection();
+        }
+
+        public SqlConnection GetSqlMockConnection()
+        {
+            return new SqlConnection(MockDbConnectionString);
+        }
+        protected override string GenerateMockConnectionString(IDbConnection originalConnection)
+        {
+            SqlConnectionStringBuilder connectionStringBuilder = new SqlConnectionStringBuilder(originalConnection.ConnectionString);
             connectionStringBuilder.InitialCatalog = MockDatabaseName;
-            MockDbConnectionString = connectionStringBuilder.ToString();
-            databaseDeployed = true;
-            SetupDatabaseObjects(realConnection);
+            return connectionStringBuilder.ToString();
         }
-        protected string GenerateMockDatabaseName(SqlConnection dbConnection)
+
+        protected override void CreateDatabase(IDbConnection originalConnection)
         {
-            return $"MockDatabase{dbConnection.Database}{DateTime.UtcNow.Ticks}";
+            using (var connection = new SqlConnection(originalConnection.ConnectionString))
+            {
+                connection.Open();
+                using (var command = connection.CreateCommand())
+                {
+#pragma warning disable CA2100 // Review SQL queries for security vulnerabilities
+                    command.CommandText = $"CREATE DATABASE {MockDatabaseName}";
+#pragma warning restore CA2100 // Review SQL queries for security vulnerabilities
+                    command.ExecuteNonQuery();
+                }
+                connection.Close();
+            }
         }
-        protected virtual void SetupDatabaseObjects(SqlConnection realConnection)
+
+        protected override void SetupDatabaseObjects(IDbConnection orginalConnection)
         {
             List<string> tableNames = new List<string>();
             List<string> tableCreateStatements = new List<string>();
             List<string> foreignKeyCreateStatements = new List<string>();
-            using (var connectionReal = new SqlConnection(realConnection.ConnectionString))
+            using (var connectionReal = new SqlConnection(orginalConnection.ConnectionString))
             {
                 connectionReal.Open();
                 using (var command = connectionReal.CreateCommand())
                 {
-                    tableNames.AddRange(command.QueryAllTables(realConnection.Database));
+                    tableNames.AddRange(command.QueryAllTables(orginalConnection.Database));
                 }
                 using (var command = connectionReal.CreateCommand())
                 {
@@ -104,26 +109,6 @@ namespace MockMyDb
             }
         }
 
-        public virtual SqlConnection GetMockConnection()
-        {
-            return new SqlConnection(MockDbConnectionString);
-        }
-
-        protected virtual void CreateDatabase(SqlConnection insertConnection)
-        {
-            using (var connection = new SqlConnection(insertConnection.ConnectionString))
-            {
-                connection.Open();
-                using (var command = connection.CreateCommand())
-                {
-#pragma warning disable CA2100 // Review SQL queries for security vulnerabilities
-                    command.CommandText = $"CREATE DATABASE {MockDatabaseName}";
-#pragma warning restore CA2100 // Review SQL queries for security vulnerabilities
-                    command.ExecuteNonQuery();
-                }
-                connection.Close();
-            }
-        }
     }
 
     internal class SqlServerMockFactory<TContext> : SqlServerMockFactory, ISqlServerMockFactory<TContext> where TContext : DbContext
@@ -154,7 +139,7 @@ namespace MockMyDb
             throw new MockException($"Couldn't create a mock context, make sure the constructor of the context take a DbContextOptions<{nameof(TContext)}> as a parameter.");
         }
 
-        protected override void SetupDatabaseObjects(SqlConnection realConnection)
+        protected override void SetupDatabaseObjects(IDbConnection realConnection)
         {
             var setupContext = CreateMockContext();
             setupContext.Database.EnsureCreated();
