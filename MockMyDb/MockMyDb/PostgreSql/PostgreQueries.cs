@@ -1,6 +1,7 @@
 ﻿using Npgsql;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 
 namespace MockMyDb.PostgreSql
@@ -30,8 +31,6 @@ namespace MockMyDb.PostgreSql
                 }
             }
         }
-
-
         internal static string GetTableCreateStatement(this NpgsqlConnection connection, string tableName)
         {
             using (var command = connection.CreateCommand())
@@ -92,7 +91,6 @@ namespace MockMyDb.PostgreSql
                 }
             }
         }
-
         internal static ICollection<ForeignKey> GetForeignKeys(this NpgsqlConnection connection, string tableName)
         {
             using (var command = connection.CreateCommand())
@@ -130,6 +128,85 @@ namespace MockMyDb.PostgreSql
                 }
             }
         }
-
+        internal static void CreateTable(this NpgsqlConnection connection , IEnumerable<string> createTableStatements)
+        {
+            foreach (var createTableStatement in createTableStatements)
+            {
+                using (var command = connection.CreateCommand())
+                {
+#pragma warning disable CA2100 // Review SQL queries for security vulnerabilities
+                    command.CommandText = createTableStatement;
+#pragma warning restore CA2100 // Review SQL queries for security vulnerabilities
+                    if(command.ExecuteNonQuery() != 1)
+                    {
+                        throw new MockException("Failed to create table.");
+                    }
+                }
+            }
+        }
+        internal static void CreatePrimaryKey(this NpgsqlConnection connection, IEnumerable<PrimaryKey> primaryKeys)
+        {
+            foreach (var primaryKey in primaryKeys)
+            {
+                //Builds the query by adding primary key columns
+                var queryBuilder = new StringBuilder();
+                queryBuilder.AppendLine(@"ALTER TABLE @tableName ADD PRIMARY KEY ");
+                using (var command = connection.CreateCommand())
+                {
+                    command.Parameters.Add("tableName", NpgsqlTypes.NpgsqlDbType.Text);
+                    command.Parameters["tableName"].Value = primaryKey.TableName;
+                    for (int i = 0; i < primaryKey.ColumnNames.Count; i++)
+                    {
+                        if(i == 0)
+                        {
+                            queryBuilder.Append("(");
+                        }
+                        //Continually add parameters
+                        command.Parameters.Add($"{i}", NpgsqlTypes.NpgsqlDbType.Text);
+                        command.Parameters[$"{i}"].Value = primaryKey.ColumnNames.ElementAt(i);
+                        queryBuilder.Append($"@{i}");
+                        if (i == primaryKey.ColumnNames.Count - 1)
+                        {
+                            queryBuilder.Append(");");
+                        }
+                        else
+                        {
+                            queryBuilder.Append(",");
+                        }
+                    }
+#pragma warning disable CA2100 // Review SQL queries for security vulnerabilities
+                    command.CommandText = queryBuilder.ToString();
+#pragma warning restore CA2100 // Review SQL queries for security vulnerabilities
+                    if(command.ExecuteNonQuery() != 1)
+                    {
+                        throw new MockException($"Could not create primary key for {primaryKey.TableName}.");
+                    }
+                }
+            }
+        }
+        internal static void CreateForeignKeys(this NpgsqlConnection connection, IEnumerable<IEnumerable<ForeignKey>> foreignKeys)
+        {
+            foreach (var foreignKey in foreignKeys)
+            {
+                using (var command = connection.CreateCommand())
+                {
+                    command.CommandText = @"ALTER TABLE @originTale ADD CONSTRAINT @constraintName FOREIGN KEY (@originColumn) REFERENCES @referencedTable (@referencedColumn);";
+                    command.Parameters.Add("constraintName", NpgsqlTypes.NpgsqlDbType.Text);
+                    command.Parameters.Add("originTable", NpgsqlTypes.NpgsqlDbType.Text);
+                    command.Parameters.Add("originColumn", NpgsqlTypes.NpgsqlDbType.Text);
+                    command.Parameters.Add("referencedTable", NpgsqlTypes.NpgsqlDbType.Text);
+                    command.Parameters.Add("referencedColumn", NpgsqlTypes.NpgsqlDbType.Text);
+                    command.Parameters["constraintName"].Value = foreignKey.ConstraintName;
+                    command.Parameters["originTable"].Value = foreignKey.OriginTable;
+                    command.Parameters["originColumn"].Value = foreignKey.OriginColumnName;
+                    command.Parameters["referencedTable"].Value = foreignKey.ReferencedTable;
+                    command.Parameters["referencedColumn"].Value = foreignKey.ReferencedColumn;
+                    if (command.ExecuteNonQuery() != 1)
+                    {
+                        throw new MockException($"Could not create primary key for {foreignKey.OriginTable}.");
+                    }
+                }
+            }
+        }
     }
 }

@@ -84,6 +84,18 @@ namespace MockMyDb
             using (var connection = new NpgsqlConnection(MockDbConnectionString))
             {
                 connection.Open();
+                if (tableCreateQueries != null)
+                {
+                    connection.CreateTable(tableCreateQueries);
+                }
+                if (primaryKeys != null)
+                {
+                    connection.CreatePrimaryKey(primaryKeys);
+                }
+                if(foreignKeys != null)
+                {
+                    connection.CreateForeignKeys(foreignKeys);
+                }
             }
         }
     }
