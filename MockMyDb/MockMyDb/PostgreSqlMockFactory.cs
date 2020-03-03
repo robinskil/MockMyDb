@@ -120,7 +120,7 @@ namespace MockMyDb
                 var context = constructor.Invoke(new[] { builder.Options });
                 return context as TContext;
             }
-            throw new MockException($"Couldn't create a mock context, make sure the constructor of the context take a DbContextOptions<{nameof(TContext)}> as a parameter.");
+            throw new MockException($"Couldn't create a mock context, make sure the constructor of the context is public and takes a DbContextOptions<{nameof(TContext)}> as a parameter.");
         }
 
         protected override void SetupDatabaseObjects(IDbConnection realConnection)
