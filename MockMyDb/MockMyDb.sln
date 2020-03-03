@@ -7,8 +7,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MockMyDb", "MockMyDb\MockMy
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MockMyDbTests", "MockMyDbTests\MockMyDbTests.csproj", "{FCDE588D-35F7-4F88-B002-C0BA377AC7B3}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestDatabaseCreator", "TestDatabaseCreator\TestDatabaseCreator.csproj", "{EB0D95E3-E8D9-40C6-8753-43E811F4C664}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -23,10 +21,6 @@ Global
 		{FCDE588D-35F7-4F88-B002-C0BA377AC7B3}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{FCDE588D-35F7-4F88-B002-C0BA377AC7B3}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{FCDE588D-35F7-4F88-B002-C0BA377AC7B3}.Release|Any CPU.Build.0 = Release|Any CPU
-		{EB0D95E3-E8D9-40C6-8753-43E811F4C664}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{EB0D95E3-E8D9-40C6-8753-43E811F4C664}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{EB0D95E3-E8D9-40C6-8753-43E811F4C664}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{EB0D95E3-E8D9-40C6-8753-43E811F4C664}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
