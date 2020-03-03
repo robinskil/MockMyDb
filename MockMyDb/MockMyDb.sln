@@ -7,6 +7,10 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MockMyDb", "MockMyDb\MockMy
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MockMyDbTests", "MockMyDbTests\MockMyDbTests.csproj", "{FCDE588D-35F7-4F88-B002-C0BA377AC7B3}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SqlServerTestDatabaseSetUp", "SqlServerTestDatabaseSetUp\SqlServerTestDatabaseSetUp.csproj", "{301F0672-3D71-44E7-A52A-75E43F7C34FF}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PostgreSqlTestDatabaseSetUp", "PostgreSqlTestDatabaseSetUp\PostgreSqlTestDatabaseSetUp.csproj", "{7946E5C4-2E92-4408-BF6D-879189493723}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +25,14 @@ Global
 		{FCDE588D-35F7-4F88-B002-C0BA377AC7B3}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{FCDE588D-35F7-4F88-B002-C0BA377AC7B3}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{FCDE588D-35F7-4F88-B002-C0BA377AC7B3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{301F0672-3D71-44E7-A52A-75E43F7C34FF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{301F0672-3D71-44E7-A52A-75E43F7C34FF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{301F0672-3D71-44E7-A52A-75E43F7C34FF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{301F0672-3D71-44E7-A52A-75E43F7C34FF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7946E5C4-2E92-4408-BF6D-879189493723}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7946E5C4-2E92-4408-BF6D-879189493723}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7946E5C4-2E92-4408-BF6D-879189493723}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7946E5C4-2E92-4408-BF6D-879189493723}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

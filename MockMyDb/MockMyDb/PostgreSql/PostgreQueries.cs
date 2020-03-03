@@ -35,7 +35,7 @@ namespace MockMyDb.PostgreSql
         {
             using (var command = connection.CreateCommand())
             {
-                command.CommandText = @"SELECT 'CREATE TABLE ' || 'account' || ' (' || E'\n' || '' || 
+                command.CommandText = @"SELECT 'CREATE TABLE ' || '@tableName' || ' (' || E'\n' || '' || 
                                         string_agg(column_list.column_expr, ', ' || E'\n' || '') || 
                                         '' || E'\n' || ');'
                                         FROM (
@@ -45,8 +45,9 @@ namespace MockMyDb.PostgreSql
                                         FROM information_schema.columns
                                         WHERE table_schema = 'public' AND table_name = '@tableName'
                                         ORDER BY ordinal_position) column_list;";
-                command.Parameters.Add("tableName", NpgsqlTypes.NpgsqlDbType.Text);
-                command.Parameters["tableName"].Value = tableName;
+                NpgsqlParameter parameter = new NpgsqlParameter("@tableName", System.Data.DbType.String);
+                parameter.Value = tableName;
+                command.Parameters.Add(parameter);
                 using (var reader = command.ExecuteReader())
                 {
                     if (reader.HasRows)

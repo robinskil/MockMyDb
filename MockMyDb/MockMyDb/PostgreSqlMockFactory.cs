@@ -10,7 +10,7 @@ using System.Text;
 
 namespace MockMyDb
 {
-    internal class PostgreSqlMockFactory : MockFactory
+    internal class PostgreSqlMockFactory : MockFactory, IPostgreSqlMockFactory
     {
         public PostgreSqlMockFactory(NpgsqlConnection dbConnection) : base(dbConnection)
         {
@@ -92,7 +92,7 @@ namespace MockMyDb
                 {
                     connection.CreatePrimaryKey(primaryKeys);
                 }
-                if(foreignKeys != null)
+                if (foreignKeys != null)
                 {
                     connection.CreateForeignKeys(foreignKeys);
                 }

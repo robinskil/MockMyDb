@@ -27,6 +27,7 @@ namespace MockMyDb
         {
             RealConnectionString = dbConnection.ConnectionString;
             RealDatabaseName = dbConnection.Database;
+            SetupMockConnection(dbConnection);
         }
         protected string GenerateMockDatabaseName(IDbConnection dbConnection)
         {

@@ -1,5 +1,6 @@
 ﻿using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
+using Npgsql;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -23,6 +24,16 @@ namespace MockMyDb
         public static ISqlServerMockFactory CreateMockFactory(string sqlConnection)
         {
             return new SqlServerMockFactory(new SqlConnection(sqlConnection));
+        }
+
+        public static IPostgreSqlMockFactory CreateMockFactoryPostgres(string connectionString)
+        {
+            return new PostgreSqlMockFactory(new NpgsqlConnection(connectionString));
+        }
+
+        public static IPostgreSqlMockFactory CreateMockFactoryPostgres(NpgsqlConnection npgsqlConnection)
+        {
+            return new PostgreSqlMockFactory(npgsqlConnection);
         }
     }
 }
