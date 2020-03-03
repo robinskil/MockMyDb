@@ -29,7 +29,7 @@ namespace MockMyDb
             RealDatabaseName = dbConnection.Database;
             SetupMockConnection(dbConnection);
         }
-        protected string GenerateMockDatabaseName(IDbConnection dbConnection)
+        protected virtual string GenerateMockDatabaseName(IDbConnection dbConnection)
         {
             return $"MockDatabase{dbConnection.Database}{DateTime.UtcNow.Ticks}";
         }

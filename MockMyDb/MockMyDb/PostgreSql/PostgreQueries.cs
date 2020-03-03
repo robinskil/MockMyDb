@@ -35,7 +35,7 @@ namespace MockMyDb.PostgreSql
         {
             using (var command = connection.CreateCommand())
             {
-                command.CommandText = @"SELECT 'CREATE TABLE ' || '@tableName' || ' (' || E'\n' || '' || 
+                command.CommandText = $@"SELECT 'CREATE TABLE ' || '{tableName}' || ' (' || E'\n' || '' || 
                                         string_agg(column_list.column_expr, ', ' || E'\n' || '') || 
                                         '' || E'\n' || ');'
                                         FROM (
@@ -43,11 +43,8 @@ namespace MockMyDb.PostgreSql
                                            coalesce('(' || character_maximum_length || ')', '') || 
                                            case when is_nullable = 'YES' then '' else ' NOT NULL' end as column_expr
                                         FROM information_schema.columns
-                                        WHERE table_schema = 'public' AND table_name = '@tableName'
+                                        WHERE table_schema = 'public' AND table_name = '{tableName}'
                                         ORDER BY ordinal_position) column_list;";
-                NpgsqlParameter parameter = new NpgsqlParameter("@tableName", System.Data.DbType.String);
-                parameter.Value = tableName;
-                command.Parameters.Add(parameter);
                 using (var reader = command.ExecuteReader())
                 {
                     if (reader.HasRows)
@@ -63,20 +60,12 @@ namespace MockMyDb.PostgreSql
         {
             using (var command = connection.CreateCommand())
             {
-                command.CommandText =   @"SELECT               
-                                        pg_attribute.attname, 
-                                        format_type(pg_attribute.atttypid, pg_attribute.atttypmod) 
-                                        FROM pg_index, pg_class, pg_attribute, pg_namespace 
-                                        WHERE 
-                                        pg_class.oid = '@tableName'::regclass AND 
-                                        indrelid = pg_class.oid AND 
-                                        nspname = 'public' AND 
-                                        pg_class.relnamespace = pg_namespace.oid AND 
-                                        pg_attribute.attrelid = pg_class.oid AND 
-                                        pg_attribute.attnum = any(pg_index.indkey)
-                                        AND indisprimary";
-                command.Parameters.Add("tableName", NpgsqlTypes.NpgsqlDbType.Text);
-                command.Parameters["tableName"].Value = tableName;
+                command.CommandText =   $@" SELECT c.column_name, c.data_type
+                                            FROM information_schema.table_constraints tc 
+                                            JOIN information_schema.constraint_column_usage AS ccu USING (constraint_schema, constraint_name) 
+                                            JOIN information_schema.columns AS c ON c.table_schema = tc.constraint_schema
+                                              AND tc.table_name = c.table_name AND ccu.column_name = c.column_name
+                                            WHERE constraint_type = 'PRIMARY KEY' and tc.table_name = '{tableName}';";
                 using (var reader = command.ExecuteReader())
                 {
                     if (reader.HasRows)
@@ -138,7 +127,8 @@ namespace MockMyDb.PostgreSql
 #pragma warning disable CA2100 // Review SQL queries for security vulnerabilities
                     command.CommandText = createTableStatement;
 #pragma warning restore CA2100 // Review SQL queries for security vulnerabilities
-                    if(command.ExecuteNonQuery() != 1)
+                    int ret = command.ExecuteNonQuery();
+                    if(ret != -1)
                     {
                         throw new MockException("Failed to create table.");
                     }
@@ -151,11 +141,9 @@ namespace MockMyDb.PostgreSql
             {
                 //Builds the query by adding primary key columns
                 var queryBuilder = new StringBuilder();
-                queryBuilder.AppendLine(@"ALTER TABLE @tableName ADD PRIMARY KEY ");
+                queryBuilder.AppendLine($@"ALTER TABLE {primaryKey.TableName} ADD PRIMARY KEY ");
                 using (var command = connection.CreateCommand())
                 {
-                    command.Parameters.Add("tableName", NpgsqlTypes.NpgsqlDbType.Text);
-                    command.Parameters["tableName"].Value = primaryKey.TableName;
                     for (int i = 0; i < primaryKey.ColumnNames.Count; i++)
                     {
                         if(i == 0)
@@ -163,9 +151,7 @@ namespace MockMyDb.PostgreSql
                             queryBuilder.Append("(");
                         }
                         //Continually add parameters
-                        command.Parameters.Add($"{i}", NpgsqlTypes.NpgsqlDbType.Text);
-                        command.Parameters[$"{i}"].Value = primaryKey.ColumnNames.ElementAt(i);
-                        queryBuilder.Append($"@{i}");
+                        queryBuilder.Append($"{primaryKey.ColumnNames.ElementAt(i)}");
                         if (i == primaryKey.ColumnNames.Count - 1)
                         {
                             queryBuilder.Append(");");
@@ -178,7 +164,8 @@ namespace MockMyDb.PostgreSql
 #pragma warning disable CA2100 // Review SQL queries for security vulnerabilities
                     command.CommandText = queryBuilder.ToString();
 #pragma warning restore CA2100 // Review SQL queries for security vulnerabilities
-                    if(command.ExecuteNonQuery() != 1)
+                    int ret = command.ExecuteNonQuery();
+                    if (ret != -1)
                     {
                         throw new MockException($"Could not create primary key for {primaryKey.TableName}.");
                     }
@@ -189,24 +176,18 @@ namespace MockMyDb.PostgreSql
         {
             foreach (var tableForeignKeys in foreignKeys)
             {
-                foreach (var foreignKey in tableForeignKeys)
+                if(tableForeignKeys != null)
                 {
-                    using (var command = connection.CreateCommand())
+                    foreach (var foreignKey in tableForeignKeys)
                     {
-                        command.CommandText = @"ALTER TABLE @originTale ADD CONSTRAINT @constraintName FOREIGN KEY (@originColumn) REFERENCES @referencedTable (@referencedColumn);";
-                        command.Parameters.Add("constraintName", NpgsqlTypes.NpgsqlDbType.Text);
-                        command.Parameters.Add("originTable", NpgsqlTypes.NpgsqlDbType.Text);
-                        command.Parameters.Add("originColumn", NpgsqlTypes.NpgsqlDbType.Text);
-                        command.Parameters.Add("referencedTable", NpgsqlTypes.NpgsqlDbType.Text);
-                        command.Parameters.Add("referencedColumn", NpgsqlTypes.NpgsqlDbType.Text);
-                        command.Parameters["constraintName"].Value = foreignKey.ConstraintName;
-                        command.Parameters["originTable"].Value = foreignKey.OriginTable;
-                        command.Parameters["originColumn"].Value = foreignKey.OriginColumnName;
-                        command.Parameters["referencedTable"].Value = foreignKey.ReferencedTable;
-                        command.Parameters["referencedColumn"].Value = foreignKey.ReferencedColumn;
-                        if (command.ExecuteNonQuery() != 1)
+                        using (var command = connection.CreateCommand())
                         {
-                            throw new MockException($"Could not create primary key for {foreignKey.OriginTable}.");
+                            command.CommandText = $@"ALTER TABLE {foreignKey.OriginTable} ADD CONSTRAINT {foreignKey.ConstraintName} FOREIGN KEY 
+                                                    ({foreignKey.OriginColumnName}) REFERENCES {foreignKey.ReferencedTable} ({foreignKey.ReferencedColumn});";
+                            if (command.ExecuteNonQuery() != 1)
+                            {
+                                throw new MockException($"Could not create primary key for {foreignKey.OriginTable}.");
+                            }
                         }
                     }
                 }

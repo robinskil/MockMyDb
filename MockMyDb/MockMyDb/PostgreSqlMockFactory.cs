@@ -27,7 +27,10 @@ namespace MockMyDb
                 using (var command = connection.CreateCommand())
                 {
 #pragma warning disable CA2100 // Review SQL queries for security vulnerabilities
-                    command.CommandText = $@"SELECT * FROM pg_stat_activity WHERE datname = '{MockDatabaseName}';
+                    command.CommandText = $@"SELECT pg_terminate_backend(pg_stat_activity.pid)
+                                            FROM pg_stat_activity
+                                            WHERE pg_stat_activity.datname = '{MockDatabaseName}' -- ← change this to your DB
+                                              AND pid <> pg_backend_pid();
                                             DROP DATABASE {MockDatabaseName}";
 #pragma warning restore CA2100 // Review SQL queries for security vulnerabilities
                     command.ExecuteNonQuery();
@@ -44,7 +47,10 @@ namespace MockMyDb
         {
             return new NpgsqlConnection(MockDbConnectionString);
         }
-
+        protected override string GenerateMockDatabaseName(IDbConnection dbConnection)
+        {
+            return $"MockDatabase{dbConnection.Database}{DateTime.UtcNow.Ticks}".ToLower();
+        }
         protected override void CreateDatabase(IDbConnection originalConnection)
         {
             using (var connection = new NpgsqlConnection(originalConnection.ConnectionString))
